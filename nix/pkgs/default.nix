@@ -43,7 +43,20 @@
   }),
   flakeRoot?../..,
   ninecraft-extract ? ../../tools/extract.sh,
-}: rec {
+}: let
+  hostPlatform = pkgs.stdenv.hostPlatform or {};
+  useI686Linux = (hostPlatform.isLinux or false) && (hostPlatform.isx86_64 or false);
+  isDarwin = pkgs.stdenv.isDarwin;
+  ninecraftPkgs =
+    if useI686Linux
+    then pkgs.pkgsi686Linux
+    else pkgs;
+in rec {
+  defaultVersion = mcpeVersions.a0_6_1 or mcpeVersions.a0_6_0;
+  zenityArgs =
+    if isDarwin
+    then {}
+    else {zenity = pkgs.zenity;};
   fetchApk = pkgs.callPackage ./fetchApk.nix {};
   mcpeVersions =
     pkgs.callPackage ./versions.nix {inherit fetchApk;};
@@ -51,9 +64,10 @@
   makeNinecraftDesktopItems = pkgs.callPackage ./desktop.nix {
     inherit ninecraft-extract mcpeVersions;
   };
-  ninecraft = pkgs.pkgsi686Linux.callPackage ./ninecraft.nix {
-    inherit glad stb ancmp ninecraft-extract makeNinecraftDesktopItems mcpeVersions;
-  };
+  ninecraft = ninecraftPkgs.callPackage ./ninecraft.nix ({
+      inherit glad stb ancmp ninecraft-extract makeNinecraftDesktopItems mcpeVersions;
+    }
+    // zenityArgs);
 
   buildNinecraftInstance = pkgs.callPackage ./buildNinecraftInstance.nix {
     inherit ninecraft ninecraft-extract mcpeVersions makeNinecraftDesktopItems;
@@ -66,7 +80,7 @@
   };
 
   ninecraft-nixgl = buildNinecraftInstance {
-    version = mcpeVersions.a0_6_1;
+    version = defaultVersion;
     useNixGL = true;
   };
   # test = pkgs.callPackage ./test.nix {

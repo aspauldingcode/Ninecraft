@@ -15,7 +15,7 @@
   gameDir ? null,
   mods ? [],
   options ? null,
-  version ? mcpeVersions.a0_6_1,
+  version ? mcpeVersions.a0_6_1 or mcpeVersions.a0_6_0,
   useNixGL ? false,
   ...
 }: let

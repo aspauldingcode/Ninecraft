@@ -5,7 +5,7 @@
   mcpeVersions,
 }: {
   instance ? null,
-  version ? mcpeVersions.a0_6_1,
+  version ? mcpeVersions.a0_6_1 or mcpeVersions.a0_6_0,
   gameDir ? "~/.local/share/ninecraft",
   homeDir ? "~/.local/share/ninecraft",
 }: let

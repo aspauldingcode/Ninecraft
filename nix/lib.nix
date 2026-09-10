@@ -1,8 +1,10 @@
 {pkgs ? import <nixpkgs> {}}: let
-  isIntel86 = pkgs.stdenv.hostPlatform.isx86;
+  hostPlatform = pkgs.stdenv.hostPlatform or {};
+  isIntel86 = hostPlatform.isx86 or false;
+  isLinux = hostPlatform.isLinux or false;
   flakeLock = builtins.fromJSON (builtins.readFile ../flake.lock);
   getHash = name: flakeLock.nodes.${name}.locked.narHash;
-  nixgl = pkgs.fetchFromGitHub {
+  nixglSrc = pkgs.fetchFromGitHub {
     owner = "nix-community";
     repo = "nixGL";
     rev = "main";
@@ -10,9 +12,13 @@
   };
 in {
   inherit getHash;
-  nixgl = import nixgl {
-    pkgs = pkgs;
-    enable32bits = isIntel86;
-    enableIntelX86Extensions = isIntel86;
-  };
+  nixgl =
+    if isLinux
+    then
+      import nixglSrc {
+        pkgs = pkgs;
+        enable32bits = isIntel86;
+        enableIntelX86Extensions = isIntel86;
+      }
+    else null;
 }

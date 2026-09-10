@@ -46,7 +46,10 @@
     a0_5_0j = "sha256-Jtc22Gohcd+KEun6Eshc357QjfGgJ2w7fAi+qc5Tj6w=";
     a0_5_0-1.x86 = "sha256-d3jWQUe68cTst/oqXTcWg5QfOStOXaXW3PQiR1jC378=";
     a0_5_0-2.x86 = "sha256-GNh2+3OoGGv1iIyG+82+EkQi3bdaKHrZ99TTG5HIb6U=";
-    a0_6_0.x86 = "sha256-SXZbK9z3UsrKNO2t1Nws0gVGXDe7/2tzuxulYfHeuao=";
+    a0_6_0 = {
+      x86 = "sha256-SXZbK9z3UsrKNO2t1Nws0gVGXDe7/2tzuxulYfHeuao=";
+      armv7 = "sha256-UJ9xWMlrDzajRFm0EuewiS0NoVSsltiMk/vaxu05c5Y=";
+    };
     a0_6_1.x86 = "sha256-rfWnsSPGvunJ8rp460dq5rJsnSHXj1IKy3tUt6xpxhI=";
     a0_7_0.x86 = "sha256-j8gHcMMHhTtNM4GH77XT96nC0mSrQyRJlbpCTDRkSvQ=";
     a0_7_1.x86 = "sha256-qKonHYhPaLT1OA8zRWe+Lta+Oaqcc1QYk39Ahu48K1k=";
@@ -94,16 +97,22 @@
   in
     out
     // (
-      builtins.listToAttrs (builtins.map (arch: {
-          name =
-            if (arch == "x86" || arch == "arm")
-            then key
-            else "${key}-${arch}";
-          value = fetchVersion {
-            inherit arch;
-            hash = hashes.${arch};
-          };
-        })
+      builtins.listToAttrs (builtins.map (arch:
+          let
+            normalizedArch =
+              if arch == "armv7"
+              then "arm"
+              else arch;
+          in {
+            name =
+              if (normalizedArch == "x86" || normalizedArch == "arm")
+              then key
+              else "${key}-${normalizedArch}";
+            value = fetchVersion {
+              inherit arch;
+              hash = hashes.${arch};
+            };
+          })
         enabledArchs)
     );
 in

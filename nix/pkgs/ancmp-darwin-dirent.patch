@@ -1,0 +1,20 @@
+diff --git a/ancmp/android_dirent.c b/ancmp/android_dirent.c
+index 7dafa89..6cff3b0 100644
+--- a/ancmp/android_dirent.c
++++ b/ancmp/android_dirent.c
+@@ -95,7 +95,11 @@ android_dirent_t *android_readdir(DIR *dirp) {
+         strncpy(ret.d_name, tmp->d_name, sizeof(ret.d_name) - 1);
+         ret.d_name[sizeof(ret.d_name) - 1] = '\0';
+         *(uint64_t *)&ret.d_ino = tmp->d_ino;
+         ret.d_reclen = sizeof(android_dirent_t);
+         ret.d_type = tmp->d_type;
+-        *(int64_t *)&ret.d_off = tmp->d_off;
++#ifdef __APPLE__
++        *(int64_t *)&ret.d_off = 0;
++#else
++        *(int64_t *)&ret.d_off = tmp->d_off;
++#endif
+         return &ret;
+     }
+     return NULL;
+

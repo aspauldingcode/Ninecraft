@@ -37,6 +37,13 @@
     stb,
     ninecraft-mod-toolchain-build-scripts,
   }: let
+    systems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
+    linuxSystems = ["x86_64-linux" "aarch64-linux"];
     mkPkgs = system:
       import nixpkgs {
         inherit system;
@@ -44,10 +51,10 @@
           allowUnfree = true;
           android_sdk.accept_license = true;
         };
-        overlays = [nixgl.overlay];
+        overlays = nixpkgs.lib.optionals (builtins.elem system linuxSystems) [nixgl.overlay];
       };
   in
-    flake-utils.lib.eachDefaultSystem (system: let
+    flake-utils.lib.eachSystem systems (system: let
       pkgs = mkPkgs system;
     in rec {
       packages =
@@ -59,7 +66,7 @@
         })
         // {
           default = packages.buildNinecraftInstance {
-            version = packages.mcpeVersions.a0_6_1;
+            version = packages.mcpeVersions.a0_6_1 or packages.mcpeVersions.a0_6_0;
           };
         };
       apps = {

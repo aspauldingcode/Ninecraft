@@ -34,7 +34,7 @@ in {
       };
       apk = lib.mkOption {
         type = types.nullOr (types.package);
-        default = pkgs.mcpeVersions.a0_6_1;
+        default = pkgs.mcpeVersions.a0_6_1 or pkgs.mcpeVersions.a0_6_0;
       };
       mods = lib.mkOption {
         type = types.listOf types.package;
